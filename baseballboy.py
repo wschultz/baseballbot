@@ -44,11 +44,11 @@ team         = 'sf'          # This is what mlb uses, we key off of this
 team_hashtag = "#SFGiants"   # This is the team #hashtag
 timezone     = "US/Pacific"  # This is the local timezone of the host machine
 last_day     = "2016-10-02"  # This is the last day of baseball. #SadPanda
-
+status_dir   = "/tmp/"
 
 
 """ We'll log our tweets. """
-logging.basicConfig(filename='baseball.log',level=logging.DEBUG,format='%(asctime)s %(message)s')
+logging.basicConfig(filename=status_dir + "baseball.log",level=logging.DEBUG,format='%(asctime)s %(message)s')
 
 
 """ This is the process of grabbing the json for a specific team """
@@ -60,7 +60,7 @@ def get_fresh_data(team):
   url = "http://gd2.mlb.com/gdcross/components/game/mlb/year_" + '{}'.format(now.year) + "/month_" + '{:02d}'.format(now.month) + "/day_" + '{:02d}'.format(now.day) + "/miniscoreboard.json"
 
   """ Grab the first response and write it to a file, we'll update it once the game starts """
-  data_write_file = '{}'.format(now.year) + '{:02d}'.format(now.month) + '{:02d}'.format(now.day) + ".json"
+  data_write_file = status_dir + '{}'.format(now.year) + '{:02d}'.format(now.month) + '{:02d}'.format(now.day) + ".json"
 
   """ Get the json data if the file doesn't exist, or if it's over three minutes old """
   if not os.path.isfile(data_write_file) or time.time() - os.path.getmtime(data_write_file) > 180:
