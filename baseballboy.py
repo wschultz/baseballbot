@@ -4,6 +4,20 @@
     This is a twitter bot that annouces baseball game times, game progress, and game results for a given team.
     I've added in the private.credentials module that I've git in .gitignore so I can keep the branch up to date
     with any changes. 
+
+private is setup as:
+
+[baseballbot]$ find private
+private
+private/__init__.py
+private/credentials.py
+
+[baseballbot]$ cat private/credentials.py
+consumer_key        = "consumer_key_from_twitter"
+consumer_secret     = "consumer_secret_from_twitter"
+access_token        = "access_token_from_twitter"
+access_token_secret = "access_token_secret_from_twitter"
+
 """
 
 testmode = True
@@ -85,20 +99,16 @@ def get_fresh_data(team):
 
 
 """ 
-    These 3 def's should be combined into a single function that loops 
-    starting at 8am and finishes once there's a final score
+    Here is the main function that prints out the current state.
+    Ideally it starts at 8am and loops through until the game's over.
 """
-
 
 def do_the_things():
   returned_no_game    = False
   returned_game_time  = False
   returned_game_final = False
   returned_game_soon  = False
-  """
-     'sched' starts this up at 8am, then it continually runs until either it returns the final
-      statements of 'there is no game today' or 'the game is over'
-  """
+
   while not (returned_no_game or returned_game_final):
     game_data = get_fresh_data(team)
 
@@ -186,7 +196,9 @@ def set_vars(game_data):
   return opponent, our_score, their_score, venue
 
 
+""" This does a psudo daemon using a while loop. The best loop in the world. """
 if __name__ == '__main__':
+
   print "Starting..."
 
   if testmode:
@@ -203,7 +215,4 @@ if __name__ == '__main__':
       time.sleep(2)
   except (KeyboardInterrupt, SystemExit):
     sched.shutdown()
-
-
-
 
