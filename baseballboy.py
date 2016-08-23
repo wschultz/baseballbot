@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+""" 
+    This is a twitter bot that annouces baseball game times, game progress, and game results for a given team.
+    I've added in the private.credentials module that I've git in .gitignore so I can keep the branch up to date
+    with any changes. 
+"""
+
+
 import private.credentials
 
 from apscheduler.schedulers.background import BackgroundScheduler
