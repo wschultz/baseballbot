@@ -96,19 +96,18 @@ def get_fresh_data(team):
   return my_game
 
 
-
-
 """ 
     Here is the main function that prints out the current state.
     Ideally it starts at 8am and loops through until the game's over.
 """
 
 def do_the_things():
-  returned_no_game    = False
-  returned_game_time  = False
-  returned_game_final = False
-  returned_game_soon  = False
-
+  returned_no_game     = False
+  returned_game_time   = False
+  returned_game_final  = False
+  returned_game_soon   = False
+  returned_game_start  = False
+  compare_scores = ['0', '0']
   while not (returned_no_game or returned_game_final):
     game_data = get_fresh_data(team)
 
@@ -134,14 +133,22 @@ def do_the_things():
       else:
         twitter.tweet(("The %s are playing against the %s today, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s") % (team_hashtag, opponent, venue))
 
-    if "Warmup" in game_data["status"] and not returned_game_soon:
+    elif "Warmup" in game_data["status"] and not returned_game_soon:
       returned_game_soon = True
       if testmode:
         print(("The %s are playing against the %s in a moment, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s") % (team_hashtag, opponent, venue))
       else:
         twitter.tweet(("The %s are playing against the %s in a moment, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s") % (team_hashtag, opponent, venue))
 
-    if "In Progress" in game_data["status"]:
+    elif "In Progress" in game_data["status"] and compare_scores == ['0', '0'] and not returned_game_start:
+      returned_game_start = True
+      if testmode:
+        print("It's gametime! Go %s!!!" % (team_hashtag))
+      else:
+        twitter.tweet("It's gametime! Go %s!!!" % (team_hashtag))
+
+    elif "In Progress" in game_data["status"] and not compare_scores == [our_score, their_score]:
+      compare_scores = [our_score, their_score]
       if int(our_score) > int(their_score):
         if testmode:
           print("The %s are winning against the %s, the score is currently %s-%s" % (team_hashtag, opponent, our_score, their_score))
@@ -149,16 +156,16 @@ def do_the_things():
           twitter.tweet("The %s are winning against the %s, the score is currently %s-%s" % (team_hashtag, opponent, our_score, their_score))
       elif int(our_score) < int(their_score):
         if testmode:
-          print("The %s are losing against the %s, the score is currently %s-%s" % (team_hashtag, opponent, our_score, their_score))
+          print("The %s are losing to the %s, the score is currently %s-%s" % (team_hashtag, opponent, our_score, their_score))
         else:
-          twitter.tweet("The %s are losing against the %s, the score is currently %s-%s" % (team_hashtag, opponent, our_score, their_score))
+          twitter.tweet("The %s are losing to the %s, the score is currently %s-%s" % (team_hashtag, opponent, our_score, their_score))
       elif int(our_score) == int(their_score):
         if testmode:
           print("The %s are tied with the %s, the score is currently %s-%s" % (team_hashtag, opponent, our_score, their_score))
         else:
           twitter.tweet("The %s are tied with the %s, the score is currently %s-%s" % (team_hashtag, opponent, our_score, their_score))
 
-    if "Final" in game_data["status"]:
+    elif "Final" in game_data["status"]:
       returned_game_final = True
       if our_score > their_score:
         if testmode:
