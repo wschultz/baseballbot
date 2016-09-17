@@ -20,7 +20,7 @@ access_token_secret = "access_token_secret_from_twitter"
 
 """
 
-testmode = True
+testmode = False
 
 import private.credentials
 
@@ -54,15 +54,17 @@ twitter = TwitterAPI()
 
 """ These are the only variables that need to be changed.
     May turn this into args later. """
-team         = 'sf'          # This is what mlb uses, we key off of this
-team_hashtag = "#SFGiants"   # This is the team #hashtag
-timezone     = "US/Pacific"  # This is the local timezone of the host machine
-last_day     = "2016-10-02"  # This is the last day of baseball. #SadPanda
-status_dir   = "/tmp/"
+team               = 'sf'          # This is what mlb uses, we key off of this
+team_hashtag       = "#SFGiants"   # This is the team #hashtag
+rival_team         = 'la'          # This is what mlb uses, we key off of this
+rival_team_hashtag = "#Dodgers"   # This is the team #hashtag
+timezone           = "US/Pacific"  # This is the local timezone of the host machine
+last_day           = "2016-10-02"  # This is the last day of baseball. #SadPanda
+status_dir         = "/tmp/"
 
 
 """ We'll log our tweets. """
-logging.basicConfig(filename=status_dir + "baseball.log",level=logging.DEBUG,format='%(asctime)s %(message)s')
+logging.basicConfig(filename=status_dir + "baseball.log", level=logging.DEBUG, format='%(asctime)s %(message)s')
 
 
 """ This is the process of grabbing the json for a specific team """
@@ -74,7 +76,8 @@ def get_fresh_data(team):
   url = "http://gd2.mlb.com/gdcross/components/game/mlb/year_" + '{}'.format(now.year) + "/month_" + '{:02d}'.format(now.month) + "/day_" + '{:02d}'.format(now.day) + "/miniscoreboard.json"
 
   """ Grab the first response and write it to a file, we'll update it once the game starts """
-  data_write_file = status_dir + '{}'.format(now.year) + '{:02d}'.format(now.month) + '{:02d}'.format(now.day) + ".json"
+  #data_write_file = status_dir + '{}'.format(now.year) + '{:02d}'.format(now.month) + '{:02d}'.format(now.day) + ".json"
+  data_write_file = "/tmp/20160908.json"
 
   """ Get the json data if the file doesn't exist, or if it's over three minutes old """
   if not os.path.isfile(data_write_file) or time.time() - os.path.getmtime(data_write_file) > 180:
@@ -105,78 +108,83 @@ def do_the_things():
   returned_no_game     = False
   returned_game_time   = False
   returned_game_final  = False
+  returned_rival_final = False
   returned_game_soon   = False
   returned_game_start  = False
-  compare_scores = ['0', '0']
+  compare_scores       = ['0', '0']
+  timeout              = time.time() + 60 * 60 * 23
+
   while not (returned_no_game or returned_game_final):
+
+    """ Infinite loops are cool """
+    if time.time() > timeout:
+      break
+
     game_data = get_fresh_data(team)
 
     """ The default TZ for mlb is US/Eastern, we'll do some things and make it local TZ """
-    tz = pytz.timezone('US/Eastern')
+    tz           = pytz.timezone('US/Eastern')
     eastern_time = datetime.datetime.strptime("%s %s" % (game_data['time_date'], game_data['ampm']), '%Y/%m/%d %I:%M %p')
     eastern_time = tz.localize(eastern_time)
     pacific_time = eastern_time.astimezone(pytz.timezone(timezone))
 
     opponent, our_score, their_score, venue = set_vars(game_data)
+    scores = sorted([our_score, their_score], reverse=True)
 
     if not game_data and not returned_no_game:
       returned_no_game = True
-      if testmode:
-        print("The %s don't have a game scheduled today. Rest well guys!" % team_hashtag)
-      else:
-        twitter.tweet("The %s don't have a game scheduled today. Rest well guys!" % team_hashtag)
+      message = ("The %s don't have a game scheduled today. Rest well guys!" % team_hashtag)
 
     if game_data and not returned_game_time:
       returned_game_time = True
-      if testmode:
-        print(("The %s are playing against the %s today, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s") % (team_hashtag, opponent, venue))
-      else:
-        twitter.tweet(("The %s are playing against the %s today, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s") % (team_hashtag, opponent, venue))
+      message = (("The %s are playing against the %s today, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s") % (team_hashtag, opponent, venue))
 
     elif "Warmup" in game_data["status"] and not returned_game_soon:
       returned_game_soon = True
-      if testmode:
-        print(("The %s are playing against the %s in a moment, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s") % (team_hashtag, opponent, venue))
-      else:
-        twitter.tweet(("The %s are playing against the %s in a moment, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s") % (team_hashtag, opponent, venue))
+      message = (("The %s are playing against the %s in a moment, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s") % (team_hashtag, opponent, venue))
 
     elif "In Progress" in game_data["status"] and compare_scores == ['0', '0'] and not returned_game_start:
       returned_game_start = True
-      if testmode:
-        print("It's gametime! Go %s!!!" % (team_hashtag))
-      else:
-        twitter.tweet("It's gametime! Go %s!!!" % (team_hashtag))
+      message = ("It's gametime! Go %s!!!" % (team_hashtag))
 
     elif "In Progress" in game_data["status"] and not compare_scores == [our_score, their_score]:
       compare_scores = [our_score, their_score]
       if int(our_score) > int(their_score):
-        if testmode:
-          print("The %s are winning against the %s, the score is currently %s-%s" % (team_hashtag, opponent, our_score, their_score))
-        else:
-          twitter.tweet("The %s are winning against the %s, the score is currently %s-%s" % (team_hashtag, opponent, our_score, their_score))
+        message = ("The %s are winning against the %s, the score is currently %s-%s" % (team_hashtag, opponent, scores[0], scores[1]))
       elif int(our_score) < int(their_score):
-        if testmode:
-          print("The %s are losing to the %s, the score is currently %s-%s" % (team_hashtag, opponent, our_score, their_score))
-        else:
-          twitter.tweet("The %s are losing to the %s, the score is currently %s-%s" % (team_hashtag, opponent, our_score, their_score))
+        message = ("The %s are losing to the %s, the score is currently %s-%s" % (team_hashtag, opponent, scores[0], scores[1]))
       elif int(our_score) == int(their_score):
-        if testmode:
-          print("The %s are tied with the %s, the score is currently %s-%s" % (team_hashtag, opponent, our_score, their_score))
-        else:
-          twitter.tweet("The %s are tied with the %s, the score is currently %s-%s" % (team_hashtag, opponent, our_score, their_score))
+        message = ("The %s are tied with the %s, the score is currently %s-%s" % (team_hashtag, opponent, scores[0], scores[1]))
 
     elif "Final" in game_data["status"]:
       returned_game_final = True
       if our_score > their_score:
-        if testmode:
-          print("The %s beat the %s today at %s with a score of %s-%s" % (team_hashtag, opponent, venue, our_score, their_score))
-        else:
-          twitter.tweet("The %s beat the %s today at %s with a score of %s-%s" % (team_hashtag, opponent, venue, our_score, their_score))
+        message = ("The %s beat the %s today at %s with a score of %s-%s" % (team_hashtag, opponent, venue, scores[0], scores[1]))
       else:
-        if testmode:
-          print("The %s lost against the %s today at %s with a score of %s-%s. Get 'em tomorrow!" % (team_hashtag, opponent, venue, our_score, their_score))
+        message = ("The %s lost against the %s today at %s with a score of %s-%s. Get 'em tomorrow!" % (team_hashtag, opponent, venue, scores[0], scores[1]))
+
+    if not returned_rival_final:
+      rival_game_data = get_fresh_data(rival_team)
+      scores = sorted([our_score, their_score], reverse=True)
+
+      if "Final" in rival_game_data["status"]:
+        returned_rival_final = True
+        if our_score > their_score:
+          rival_message = ("The %s beat the %s today at %s with a score of %s-%s, boooo!" % (team_hashtag, opponent, venue, scores[0], scores[1]))
         else:
-          twitter.tweet("The %s lost against the %s today at %s with a score of %s-%s. Get 'em tomorrow!" % (team_hashtag, opponent, venue, our_score, their_score))
+          rival_message = ("The %s lost against the %s today at %s with a score of %s-%s. Hell yeah!" % (team_hashtag, opponent, venue, scores[0], scores[1]))
+
+    if message:
+      if testmode:
+        print(message)
+      else:
+        twitter.tweet(message)
+
+    if rival_message:
+      if testmode:
+        print(rival_message)
+      else:
+        twitter.tweet(rival_message)
 
     time.sleep(5)
 
