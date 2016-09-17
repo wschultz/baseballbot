@@ -76,8 +76,7 @@ def get_fresh_data(team):
   url = "http://gd2.mlb.com/gdcross/components/game/mlb/year_" + '{}'.format(now.year) + "/month_" + '{:02d}'.format(now.month) + "/day_" + '{:02d}'.format(now.day) + "/miniscoreboard.json"
 
   """ Grab the first response and write it to a file, we'll update it once the game starts """
-  #data_write_file = status_dir + '{}'.format(now.year) + '{:02d}'.format(now.month) + '{:02d}'.format(now.day) + ".json"
-  data_write_file = "/tmp/20160908.json"
+  data_write_file = status_dir + '{}'.format(now.year) + '{:02d}'.format(now.month) + '{:02d}'.format(now.day) + ".json"
 
   """ Get the json data if the file doesn't exist, or if it's over three minutes old """
   if not os.path.isfile(data_write_file) or time.time() - os.path.getmtime(data_write_file) > 180:
