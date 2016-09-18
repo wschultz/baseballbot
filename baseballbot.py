@@ -57,8 +57,8 @@ twitter = TwitterAPI()
 team               = 'sf'          # This is what mlb uses, we key off of this
 team_hashtag       = "#SFGiants"   # This is the team #hashtag
 rival_team         = 'la'          # This is what mlb uses, we key off of this
-rival_team_hashtag = "#Dodgers"   # This is the team #hashtag
-rival_team_hash2   = "#BeatLA"   # This is the team #hashtag
+rival_team_hashtag = "#Dodgers"    # This is the team #hashtag
+rival_team_hash2   = "#BeatLA"     # This is the team #hashtag
 timezone           = "US/Pacific"  # This is the local timezone of the host machine
 last_day           = "2016-10-02"  # This is the last day of baseball. #SadPanda
 status_dir         = "/tmp/"
@@ -81,6 +81,7 @@ def get_fresh_data(team):
 
   """ Get the json data if the file doesn't exist, or if it's over three minutes old """
   if not os.path.isfile(data_write_file) or time.time() - os.path.getmtime(data_write_file) > 180:
+    print("Getting the file")
     response  = urllib.urlopen(url)
     full_data = json.loads(response.read())
     with open(data_write_file, 'w') as outfile:
@@ -105,95 +106,102 @@ def do_the_things():
       Here is the main function that prints out the current state.
       Ideally it starts at 8am and loops through until the game's over.
   """
-  returned_no_game     = False
-  returned_game_time   = False
-  returned_game_final  = False
-  returned_rival_final = False
-  returned_game_soon   = False
-  returned_rival_soon  = False
-  returned_game_start  = False
-  compare_scores       = ['0', '0']
-  timeout              = time.time() + 60 * 60 * 23
-
+  returned_no_game      = False
+  returned_game_time    = False
+  returned_game_final   = False
+  returned_rival_final  = False
+  returned_game_soon    = False
+  returned_rival_soon   = False
+  returned_game_start   = False
+  compare_scores        = ['0', '0']
+  timeout               = time.time() + 60 * 60 * 23
+  message               = False
+  rival_message         = False
   while not (returned_no_game or returned_game_final):
 
-    """ Infinite loops are cool """
-    if time.time() > timeout:
-      break
+    try:
 
-    game_data = get_fresh_data(team)
+      """ Infinite loops are cool """
+      if time.time() > timeout:
+        break
 
-    """ The default TZ for mlb is US/Eastern, we'll do some things and make it local TZ """
-    tz           = pytz.timezone('US/Eastern')
-    eastern_time = datetime.datetime.strptime("%s %s" % (game_data['time_date'], game_data['ampm']), '%Y/%m/%d %I:%M %p')
-    eastern_time = tz.localize(eastern_time)
-    pacific_time = eastern_time.astimezone(pytz.timezone(timezone))
+      game_data = get_fresh_data(team)
 
-    opponent, our_score, their_score, venue = set_vars(game_data)
-    scores = sorted([our_score, their_score], reverse=True)
+      """ The default TZ for mlb is US/Eastern, we'll do some things and make it local TZ """
+      tz           = pytz.timezone('US/Eastern')
+      eastern_time = datetime.datetime.strptime("%s %s" % (game_data['time_date'], game_data['ampm']), '%Y/%m/%d %I:%M %p')
+      eastern_time = tz.localize(eastern_time)
+      pacific_time = eastern_time.astimezone(pytz.timezone(timezone))
 
-    if not game_data and not returned_no_game:
-      returned_no_game = True
-      message = ("The %s don't have a game scheduled today. Rest well guys!" % team_hashtag)
-
-    if game_data and not returned_game_time:
-      returned_game_time = True
-      message = (("The %s are playing against the %s today, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s") % (team_hashtag, opponent, venue))
-
-    elif "Warmup" in game_data["status"] and not returned_game_soon:
-      returned_game_soon = True
-      message = (("The %s are playing against the %s in a moment, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s") % (team_hashtag, opponent, venue))
-
-    elif "In Progress" in game_data["status"] and compare_scores == ['0', '0'] and not returned_game_start:
-      returned_game_start = True
-      message = ("It's gametime! Go %s!!!" % (team_hashtag))
-
-    elif "In Progress" in game_data["status"] and not compare_scores == [our_score, their_score]:
-      compare_scores = [our_score, their_score]
-      if int(our_score) > int(their_score):
-        message = ("The %s are winning against the %s, the score is currently %s-%s" % (team_hashtag, opponent, scores[0], scores[1]))
-      elif int(our_score) < int(their_score):
-        message = ("The %s are losing to the %s, the score is currently %s-%s" % (team_hashtag, opponent, scores[0], scores[1]))
-      elif int(our_score) == int(their_score):
-        message = ("The %s are tied with the %s, the score is currently %s-%s" % (team_hashtag, opponent, scores[0], scores[1]))
-
-    elif "Final" in game_data["status"]:
-      returned_game_final = True
-      if our_score > their_score:
-        message = ("The %s beat the %s today at %s with a score of %s-%s" % (team_hashtag, opponent, venue, scores[0], scores[1]))
-      else:
-        message = ("The %s lost against the %s today at %s with a score of %s-%s. Get 'em tomorrow!" % (team_hashtag, opponent, venue, scores[0], scores[1]))
-
-    if not returned_rival_final:
-      rival_game_data = get_fresh_data(rival_team)
-      rival_opponent, rival_our_score, rival_their_score, rival_venue = set_vars(rival_game_data)
+      opponent, our_score, their_score, venue = set_vars(game_data)
       scores = sorted([our_score, their_score], reverse=True)
 
-      if "Warmup" in rival_game_data["status"] and not returned_rival_soon:
-        returned_rival_soon = True
-        rival_message = ("The %s game is about to start, go %s!!! %s") & (rival_team_hashtag, rival_opponent, rival_team_hash2)
+      if not game_data and not returned_no_game:
+        returned_no_game = True
+        message = ("The %s don't have a game scheduled today. Rest well guys!" % team_hashtag)
 
-      if "Final" in rival_game_data["status"]:
-        returned_rival_final = True
-        if rival_our_score > rival_their_score:
-          rival_message = ("The %s beat the %s today at %s with a score of %s-%s, boooo!" % (team_hashtag, rival_opponent, rival_venue, scores[0], scores[1]))
+      elif game_data and not returned_game_time:
+        returned_game_time = True
+        message = (("The %s are playing against the %s today, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s") % (team_hashtag, opponent, venue))
+
+      elif "Warmup" in game_data["status"] and not returned_game_soon:
+        returned_game_soon = True
+        message = (("The %s are playing against the %s in a moment, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s") % (team_hashtag, opponent, venue))
+
+      elif "In Progress" in game_data["status"] and compare_scores == ['0', '0'] and not returned_game_start:
+        returned_game_start = True
+        message = ("It's gametime! Go %s!!!" % (team_hashtag))
+
+      elif "In Progress" in game_data["status"] and not compare_scores == [our_score, their_score]:
+        compare_scores = [our_score, their_score]
+        if int(our_score) > int(their_score):
+          message = ("The %s are winning against the %s, the score is currently %s-%s" % (team_hashtag, opponent, scores[0], scores[1]))
+        elif int(our_score) < int(their_score):
+          message = ("The %s are losing to the %s, the score is currently %s-%s" % (team_hashtag, opponent, scores[0], scores[1]))
+        elif int(our_score) == int(their_score):
+          message = ("The %s are tied with the %s, the score is currently %s-%s" % (team_hashtag, opponent, scores[0], scores[1]))
+
+      elif "Final" in game_data["status"]:
+        returned_game_final = True
+        if our_score > their_score:
+          message = ("The %s beat the %s today at %s with a score of %s-%s" % (team_hashtag, opponent, venue, scores[0], scores[1]))
         else:
-          rival_message = ("The %s lost against the %s today at %s with a score of %s-%s. Hell yeah!" % (team_hashtag, rival_opponent, rival_venue, scores[0], scores[1]))
+          message = ("The %s lost against the %s today at %s with a score of %s-%s. Get 'em tomorrow!" % (team_hashtag, opponent, venue, scores[0], scores[1]))
 
-    if message:
-      if testmode:
-        print(message)
-      else:
-        twitter.tweet(message)
+      if not returned_rival_final:
+        rival_game_data = get_fresh_data(rival_team)
+        rival_opponent, rival_our_score, rival_their_score, rival_venue = set_vars(rival_game_data)
+        scores = sorted([our_score, their_score], reverse=True)
 
-    if rival_message:
-      if testmode:
-        print(rival_message)
-      else:
-        twitter.tweet(rival_message)
+        if "Warmup" in rival_game_data["status"] and not returned_rival_soon:
+          returned_rival_soon = True
+          rival_message = ("The %s game is about to start, go %s!!! %s") & (rival_team_hashtag, rival_opponent, rival_team_hash2)
+
+        if "Final" in rival_game_data["status"]:
+          returned_rival_final = True
+          if rival_our_score > rival_their_score:
+            rival_message = ("The %s beat the %s today at %s with a score of %s-%s, boooo!" % (team_hashtag, rival_opponent, rival_venue, scores[0], scores[1]))
+          else:
+            rival_message = ("The %s lost against the %s today at %s with a score of %s-%s. Hell yeah!" % (team_hashtag, rival_opponent, rival_venue, scores[0], scores[1]))
+
+      if message:
+        if testmode:
+          print(message)
+        else:
+          twitter.tweet(message)
+
+      if rival_message:
+        if testmode:
+          print(rival_message)
+        else:
+          twitter.tweet(rival_message)
+
+    except tweepy.TweepError as e:
+      print e.message[0]['code']
+      print e.args[0][0]['code']
+
 
     time.sleep(5)
-
 
 
 def set_vars(game_data):
