@@ -140,15 +140,15 @@ def do_the_things():
 
       if game_data and not returned_game_time:
         returned_game_time = True
-        message = (("The %s are playing against the %s today, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s") % (team_hashtag, opponent, venue))
+        message = (("The %s are playing against the %s today, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s. %s") % (team_hashtag, opponent, venue, team_hash2))
 
       if "Warmup" in game_data["status"] and not returned_game_soon:
         returned_game_soon = True
-        message = (("The %s are playing against the %s in a moment, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s") % (team_hashtag, opponent, venue))
+        message = (("The %s are playing against the %s in a moment, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s. %s") % (team_hashtag, opponent, venue, team_hash2))
 
       if "In Progress" in game_data["status"] and compare_scores == ['0', '0'] and not returned_game_start:
         returned_game_start = True
-        message = ("It's gametime! Go %s!!!" % (team_hashtag))
+        message = ("It's gametime! Go %s!!! %s" % (team_hashtag, team_hash2))
 
       if "In Progress" in game_data["status"] and not compare_scores == [our_score, their_score]:
         compare_scores = [our_score, their_score]
