@@ -63,10 +63,8 @@ timezone           = "US/Pacific"  # This is the local timezone of the host mach
 last_day           = "2016-10-02"  # This is the last day of baseball. #SadPanda
 status_dir         = "/tmp/"
 
-
 """ We'll log our tweets. """
 logging.basicConfig(filename=status_dir + "baseball.log", level=logging.DEBUG, format='%(asctime)s %(message)s')
-
 
 """ This is the process of grabbing the json for a specific team """
 def get_fresh_data(team):
@@ -100,7 +98,6 @@ def get_fresh_data(team):
 
 
 def do_the_things():
-
   """
       Here is the main function that prints out the current state.
       Ideally it starts at 8am and loops through until the game's over.
@@ -114,6 +111,7 @@ def do_the_things():
   returned_game_start   = False
   compare_scores        = ['0', '0']
   timeout               = time.time() + 60 * 60 * 23
+
   while not (returned_no_game or returned_game_final):
 
     try:
@@ -160,7 +158,7 @@ def do_the_things():
         elif int(our_score) == int(their_score):
           message = ("The %s are tied with the %s, the score is currently %s-%s" % (team_hashtag, opponent, scores[0], scores[1]))
 
-      elif "Final" in game_data["status"]:
+      elif ("Game Over" or "Final") in game_data["status"]:
         returned_game_final = True
         if our_score > their_score:
           message = ("The %s beat the %s today at %s with a score of %s-%s" % (team_hashtag, opponent, venue, scores[0], scores[1]))
@@ -176,7 +174,7 @@ def do_the_things():
           returned_rival_soon = True
           rival_message = ("The %s game is about to start, go %s!!! %s") & (rival_team_hashtag, rival_opponent, rival_team_hash2)
 
-        if "Final" in rival_game_data["status"]:
+        if ("Game Over" or "Final") in rival_game_data["status"]:
           returned_rival_final = True
           if rival_our_score > rival_their_score:
             rival_message = ("The %s beat the %s today at %s with a score of %s-%s, boooo!" % (team_hashtag, rival_opponent, rival_venue, scores[0], scores[1]))
@@ -198,7 +196,6 @@ def do_the_things():
     except tweepy.TweepError as e:
       print e.message[0]['code']
       print e.args[0][0]['code']
-
 
     time.sleep(5)
 
@@ -234,7 +231,6 @@ if __name__ == '__main__':
   else:
     sched = BackgroundScheduler()
     sched.add_job(do_the_things, 'cron', hour=8, minute=0, end_date=last_day)
-
     sched.start()
 
   try:
