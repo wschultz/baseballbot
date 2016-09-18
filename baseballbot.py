@@ -20,7 +20,7 @@ access_token_secret = "access_token_secret_from_twitter"
 
 """
 
-testmode = False
+testmode = True
 
 import private.credentials
 
@@ -81,7 +81,6 @@ def get_fresh_data(team):
 
   """ Get the json data if the file doesn't exist, or if it's over three minutes old """
   if not os.path.isfile(data_write_file) or time.time() - os.path.getmtime(data_write_file) > 180:
-    print("Getting the file")
     response  = urllib.urlopen(url)
     full_data = json.loads(response.read())
     with open(data_write_file, 'w') as outfile:
@@ -115,11 +114,11 @@ def do_the_things():
   returned_game_start   = False
   compare_scores        = ['0', '0']
   timeout               = time.time() + 60 * 60 * 23
-  message               = False
-  rival_message         = False
   while not (returned_no_game or returned_game_final):
 
     try:
+      message       = False
+      rival_message = False
 
       """ Infinite loops are cool """
       if time.time() > timeout:
@@ -244,4 +243,3 @@ if __name__ == '__main__':
       time.sleep(2)
   except (KeyboardInterrupt, SystemExit):
     sched.shutdown()
-
