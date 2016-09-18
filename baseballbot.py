@@ -58,6 +58,7 @@ team               = 'sf'          # This is what mlb uses, we key off of this
 team_hashtag       = "#SFGiants"   # This is the team #hashtag
 rival_team         = 'la'          # This is what mlb uses, we key off of this
 rival_team_hashtag = "#Dodgers"   # This is the team #hashtag
+rival_team_hash2   = "#BeatLA"   # This is the team #hashtag
 timezone           = "US/Pacific"  # This is the local timezone of the host machine
 last_day           = "2016-10-02"  # This is the last day of baseball. #SadPanda
 status_dir         = "/tmp/"
@@ -170,7 +171,7 @@ def do_the_things():
 
       if "Warmup" in rival_game_data["status"] and not returned_rival_soon:
         returned_rival_soon = True
-        message = ("The %s game is about to start, go %s!!! #BeatLA") & (rival_team_hashtag, rival_opponent)
+        rival_message = ("The %s game is about to start, go %s!!! %s") & (rival_team_hashtag, rival_opponent, rival_team_hash2)
 
       if "Final" in rival_game_data["status"]:
         returned_rival_final = True
