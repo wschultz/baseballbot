@@ -137,19 +137,19 @@ def do_the_things():
         returned_no_game = True
         message = ("The %s don't have a game scheduled today. Rest well guys!" % team_hashtag)
 
-      elif game_data and not returned_game_time:
+      if game_data and not returned_game_time:
         returned_game_time = True
         message = (("The %s are playing against the %s today, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s") % (team_hashtag, opponent, venue))
 
-      elif "Warmup" in game_data["status"] and not returned_game_soon:
+      if "Warmup" in game_data["status"] and not returned_game_soon:
         returned_game_soon = True
         message = (("The %s are playing against the %s in a moment, first pitch is at " + pacific_time.strftime("%-I:%M%p %Z") + " at %s") % (team_hashtag, opponent, venue))
 
-      elif "In Progress" in game_data["status"] and compare_scores == ['0', '0'] and not returned_game_start:
+      if "In Progress" in game_data["status"] and compare_scores == ['0', '0'] and not returned_game_start:
         returned_game_start = True
         message = ("It's gametime! Go %s!!!" % (team_hashtag))
 
-      elif "In Progress" in game_data["status"] and not compare_scores == [our_score, their_score]:
+      if "In Progress" in game_data["status"] and not compare_scores == [our_score, their_score]:
         compare_scores = [our_score, their_score]
         if int(our_score) > int(their_score):
           message = ("The %s are winning against the %s, the score is currently %s-%s" % (team_hashtag, opponent, scores[0], scores[1]))
@@ -158,7 +158,7 @@ def do_the_things():
         elif int(our_score) == int(their_score):
           message = ("The %s are tied with the %s, the score is currently %s-%s" % (team_hashtag, opponent, scores[0], scores[1]))
 
-      elif ("Game Over" or "Final") in game_data["status"]:
+      if ("Game Over" or "Final") in game_data["status"]:
         returned_game_final = True
         if our_score > their_score:
           message = ("The %s beat the %s today at %s with a score of %s-%s" % (team_hashtag, opponent, venue, scores[0], scores[1]))
