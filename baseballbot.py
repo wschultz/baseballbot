@@ -99,12 +99,12 @@ def get_fresh_data(team):
   return my_game
 
 
-""" 
-    Here is the main function that prints out the current state.
-    Ideally it starts at 8am and loops through until the game's over.
-"""
-
 def do_the_things():
+
+  """
+      Here is the main function that prints out the current state.
+      Ideally it starts at 8am and loops through until the game's over.
+  """
   returned_no_game     = False
   returned_game_time   = False
   returned_game_final  = False
@@ -195,8 +195,9 @@ def do_the_things():
     time.sleep(5)
 
 
-""" Here we set some variables for later formatting """
+
 def set_vars(game_data):
+  """ Here we set some variables for later formatting """
   if team in game_data['home_file_code']:
     we_are      = "home"
     they_are    = "away"
@@ -219,7 +220,6 @@ def set_vars(game_data):
 
 """ This does a psudo daemon using a while loop. The best loop in the world. """
 if __name__ == '__main__':
-
   print "Starting..."
 
   if testmode:
@@ -231,7 +231,7 @@ if __name__ == '__main__':
     sched.start()
 
   try:
-    # Poorman daemon
+    # Look at me, I'm a daemon now
     while True:
       time.sleep(2)
   except (KeyboardInterrupt, SystemExit):
