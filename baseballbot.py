@@ -168,7 +168,7 @@ def do_the_things():
       if not returned_rival_final:
         rival_game_data = get_fresh_data(rival_team)
         rival_opponent, rival_our_score, rival_their_score, rival_venue = set_vars(rival_game_data)
-        scores = sorted([our_score, their_score], reverse=True)
+        rival_scores = sorted([rival_our_score, rival_their_score], reverse=True)
 
         if "Warmup" in rival_game_data["status"] and not returned_rival_soon:
           returned_rival_soon = True
@@ -177,9 +177,9 @@ def do_the_things():
         if ("Game Over" or "Final") in rival_game_data["status"]:
           returned_rival_final = True
           if rival_our_score > rival_their_score:
-            rival_message = ("The %s beat the %s today at %s with a score of %s-%s, boooo!" % (team_hashtag, rival_opponent, rival_venue, scores[0], scores[1]))
+            rival_message = ("The %s beat the %s today at %s with a score of %s-%s, boooo!" % (rival_team_hashtag, rival_opponent, rival_venue, rival_scores[0], rival_scores[1]))
           else:
-            rival_message = ("The %s lost against the %s today at %s with a score of %s-%s. Hell yeah!" % (team_hashtag, rival_opponent, rival_venue, scores[0], scores[1]))
+            rival_message = ("The %s lost against the %s today at %s with a score of %s-%s. Hell yeah!" % (rival_team_hashtag, rival_opponent, rival_venue, rival_scores[0], rival_scores[1]))
 
       if message:
         if testmode:
