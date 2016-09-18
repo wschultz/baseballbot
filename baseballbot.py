@@ -54,14 +54,15 @@ twitter = TwitterAPI()
 
 """ These are the only variables that need to be changed.
     May turn this into args later. """
-team               = 'sf'          # This is what mlb uses, we key off of this
-team_hashtag       = "#SFGiants"   # This is the team #hashtag
-rival_team         = 'la'          # This is what mlb uses, we key off of this
-rival_team_hashtag = "#Dodgers"    # This is the team #hashtag
-rival_team_hash2   = "#BeatLA"     # This is the team #hashtag
-timezone           = "US/Pacific"  # This is the local timezone of the host machine
-last_day           = "2016-10-02"  # This is the last day of baseball. #SadPanda
-status_dir         = "/tmp/"
+team               = 'sf'             # This is what mlb uses, we key off of this
+team_hashtag       = "#SFGiants"      # This is the team #hashtag
+team_hash2         = "#LetsGoGiants"  # This is the team #hashtag
+rival_team         = 'la'             # This is what mlb uses, we key off of this
+rival_team_hashtag = "#Dodgers"       # This is the rival team #hashtag
+rival_team_hash2   = "#BeatLA"        # This is another rival team #hashtag
+timezone           = "US/Pacific"     # This is the local timezone of the host machine
+last_day           = "2016-10-02"     # This is the last day of baseball. #SadPanda
+status_dir         = "/tmp/"          # This is where we store files
 
 """ We'll log our tweets. """
 logging.basicConfig(filename=status_dir + "baseball.log", level=logging.DEBUG, format='%(asctime)s %(message)s')
@@ -152,18 +153,18 @@ def do_the_things():
       if "In Progress" in game_data["status"] and not compare_scores == [our_score, their_score]:
         compare_scores = [our_score, their_score]
         if int(our_score) > int(their_score):
-          message = ("The %s are winning against the %s, the score is currently %s-%s" % (team_hashtag, opponent, scores[0], scores[1]))
+          message = ("The %s are winning against the %s, the score is currently %s-%s. %s" % (team_hashtag, opponent, scores[0], scores[1], team_hash2))
         elif int(our_score) < int(their_score):
-          message = ("The %s are losing to the %s, the score is currently %s-%s" % (team_hashtag, opponent, scores[0], scores[1]))
+          message = ("The %s are losing to the %s, the score is currently %s-%s. %s" % (team_hashtag, opponent, scores[0], scores[1], team_hash2))
         elif int(our_score) == int(their_score):
-          message = ("The %s are tied with the %s, the score is currently %s-%s" % (team_hashtag, opponent, scores[0], scores[1]))
+          message = ("The %s are tied with the %s, the score is currently %s-%s. %s" % (team_hashtag, opponent, scores[0], scores[1], team_hash2))
 
       if ("Game Over" or "Final") in game_data["status"]:
         returned_game_final = True
         if our_score > their_score:
-          message = ("The %s beat the %s today at %s with a score of %s-%s" % (team_hashtag, opponent, venue, scores[0], scores[1]))
+          message = ("The %s beat the %s today at %s with a score of %s-%s. %s" % (team_hashtag, opponent, venue, scores[0], scores[1], team_hash2))
         else:
-          message = ("The %s lost against the %s today at %s with a score of %s-%s. Get 'em tomorrow!" % (team_hashtag, opponent, venue, scores[0], scores[1]))
+          message = ("The %s lost against the %s today at %s with a score of %s-%s. Get 'em tomorrow! %s" % (team_hashtag, opponent, venue, scores[0], scores[1], team_hash2))
 
       if not returned_rival_final:
         rival_game_data = get_fresh_data(rival_team)
