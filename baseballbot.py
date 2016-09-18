@@ -173,7 +173,7 @@ def do_the_things():
 
         if "Warmup" in rival_game_data["status"] and not returned_rival_soon:
           returned_rival_soon = True
-          rival_message = ("The %s game is about to start, go %s!!! %s") & (rival_team_hashtag, rival_opponent, rival_team_hash2)
+          rival_message = ("The %s game is about to start, go %s!!! %s") % (rival_team_hashtag, rival_opponent, rival_team_hash2)
 
         if ("Game Over" or "Final") in rival_game_data["status"]:
           returned_rival_final = True
