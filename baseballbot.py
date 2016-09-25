@@ -20,7 +20,7 @@ access_token_secret = "access_token_secret_from_twitter"
 
 """
 
-testmode = True
+testmode = False
 
 import private.credentials
 
@@ -79,7 +79,7 @@ def get_fresh_data(team):
   data_write_file = status_dir + '{}'.format(now.year) + '{:02d}'.format(now.month) + '{:02d}'.format(now.day) + ".json"
 
   """ Get the json data if the file doesn't exist, or if it's over three minutes old """
-  if not os.path.isfile(data_write_file) or time.time() - os.path.getmtime(data_write_file) > 180:
+  if not os.path.isfile(data_write_file) or time.time() - os.path.getmtime(data_write_file) > 60:
     response  = urllib.urlopen(url)
     full_data = json.loads(response.read())
     with open(data_write_file, 'w') as outfile:
