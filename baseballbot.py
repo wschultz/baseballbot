@@ -153,9 +153,9 @@ def do_the_things():
       if "In Progress" in game_data["status"] and not compare_scores == [our_score, their_score]:
         compare_scores = [our_score, their_score]
         if int(our_score) > int(their_score):
-          message = ("The %s are winning against the %s, the score is currently %s-%s. %s" % (team_hashtag, opponent, scores[0], scores[1], team_hash2))
+          message = ("The %s are leading the %s, the score is currently %s-%s. %s" % (team_hashtag, opponent, scores[0], scores[1], team_hash2))
         elif int(our_score) < int(their_score):
-          message = ("The %s are losing to the %s, the score is currently %s-%s. %s" % (team_hashtag, opponent, scores[0], scores[1], team_hash2))
+          message = ("The %s are trailing the %s, the score is currently %s-%s. %s" % (team_hashtag, opponent, scores[0], scores[1], team_hash2))
         elif int(our_score) == int(their_score):
           message = ("The %s are tied with the %s, the score is currently %s-%s. %s" % (team_hashtag, opponent, scores[0], scores[1], team_hash2))
 
