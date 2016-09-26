@@ -68,7 +68,7 @@ status_dir         = "/tmp/"          # This is where we store files
 logging.basicConfig(filename=status_dir + "baseball.log", level=logging.DEBUG, format='%(asctime)s %(message)s')
 
 """ This is the process of grabbing the json for a specific team """
-def get_fresh_data(team):
+def get_fresh_data(get_team):
   """ This section grabs json data from mlbam """
 
   """ Create the URL for today """
@@ -92,7 +92,7 @@ def get_fresh_data(team):
   """ This will return false if there is no game today, else will return json data for just our team """
   my_game  = False
   for game in full_data['data']['games']['game']:
-    if team in game['home_file_code'] or team in game['away_file_code']:
+    if get_team in game['home_file_code'] or get_team in game['away_file_code']:
       my_game = game
   
   return my_game
