@@ -125,14 +125,15 @@ def do_the_things():
 
       game_data = get_fresh_data(team)
 
-      """ The default TZ for mlb is US/Eastern, we'll do some things and make it local TZ """
-      tz           = pytz.timezone('US/Eastern')
-      eastern_time = datetime.datetime.strptime("%s %s" % (game_data['time_date'], game_data['ampm']), '%Y/%m/%d %I:%M %p')
-      eastern_time = tz.localize(eastern_time)
-      pacific_time = eastern_time.astimezone(pytz.timezone(timezone))
+      if game_data:
+        """ The default TZ for mlb is US/Eastern, we'll do some things and make it local TZ """
+        tz           = pytz.timezone('US/Eastern')
+        eastern_time = datetime.datetime.strptime("%s %s" % (game_data['time_date'], game_data['ampm']), '%Y/%m/%d %I:%M %p')
+        eastern_time = tz.localize(eastern_time)
+        pacific_time = eastern_time.astimezone(pytz.timezone(timezone))
 
-      opponent, our_score, their_score, venue = set_vars(game_data)
-      scores = sorted([our_score, their_score], reverse=True)
+        opponent, our_score, their_score, venue = set_vars(game_data)
+        scores = sorted([our_score, their_score], reverse=True)
 
       if not game_data and not returned_no_game:
         returned_no_game = True
