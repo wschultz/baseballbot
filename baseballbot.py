@@ -61,7 +61,7 @@ rival_team         = 'la'             # This is what mlb uses, we key off of thi
 rival_team_hashtag = "#Dodgers"       # This is the rival team #hashtag
 rival_team_hash2   = "#BeatLA"        # This is another rival team #hashtag
 timezone           = "US/Pacific"     # This is the local timezone of the host machine
-last_day           = "2016-10-02"     # This is the last day of baseball. #SadPanda
+last_day           = "2017-10-01"     # This is the last day of baseball. #SadPanda
 status_dir         = "/tmp/"          # This is where we store files
 
 """ We'll log our tweets. """
